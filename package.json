@@ -1,6 +1,6 @@
 {
   "name": "tool-openocd-riscv-wch",
-  "version": "2.1100.230103",
+  "version": "2.1100.230922",
   "description": "Fork of Open On-Chip Debugger that has RISC-V support",
   "keywords": [
     "tools",
