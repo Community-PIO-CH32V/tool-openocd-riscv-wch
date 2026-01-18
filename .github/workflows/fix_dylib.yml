@@ -39,6 +39,9 @@ jobs:
           
           # Verify the changes
           otool -L ./openocd
+      - name: Uninstall brew packages to verify self-contained binary
+        run: |
+          brew uninstall libusb hidapi
       - name: Try to run fixed openocd
         run: ./bin/openocd --version || true
       - name: Upload fixed openocd
