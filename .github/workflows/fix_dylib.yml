@@ -14,5 +14,25 @@ jobs:
       - uses: actions/checkout@v4
       - name: List dependencies (macOS)
         run: otool -L ./bin/openocd
-      - name: Try to run openocd
+      - name: Try to run unfixed openocd
         run: ./bin/openocd --version || true
+      - name: Fix dylib dependencies
+        run: |
+          cd bin
+          # Fix openocd binary to search for dylibs in ../lib directory
+          echo "Fixing openocd dependencies..."
+          install_name_tool -change /opt/homebrew/opt/libusb/lib/libusb-1.0.0.dylib "@loader_path/../lib/libusb-1.0.0.dylib" ./openocd
+          install_name_tool -change /opt/homebrew/opt/hidapi/lib/libhidapi.0.dylib "@loader_path/../lib/libhidapi.0.dylib" ./openocd
+          
+          # Verify the changes
+          otool -L ./openocd
+      - name: Try to run fixed openocd
+        run: ./bin/openocd --version || true
+      - name: Upload fixed openocd
+        uses: actions/upload-artifact@v4
+        with:
+          name: openocd-fixed
+          path: |
+            bin/openocd
+            lib/libusb-1.0.0.dylib
+            lib/libhidapi.0.dylib
