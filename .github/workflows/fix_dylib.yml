@@ -1,0 +1,18 @@
+name: Fix dylib dependencies
+
+on: [push, pull_request]
+
+jobs:
+  check-dylib:
+    strategy:
+      fail-fast: false
+      matrix:
+        # See https://github.com/actions/runner-images?tab=readme-ov-file#available-images
+        os: [macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: List dependencies (macOS)
+        run: otool -L ./bin/openocd
+      - name: Try to run openocd
+        run: ./bin/openocd --version || true
