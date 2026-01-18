@@ -12,13 +12,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies with brew
+        run: |
+          brew install libusb hidapi
       - name: List dependencies (macOS)
         run: otool -L ./bin/openocd
       - name: Try to run unfixed openocd
         run: ./bin/openocd --version || true
       - name: Fix dylib dependencies
         run: |
-          cd bin        
+          cd bin
+          # Copy dylib files from homebrew
+          cp /opt/homebrew/opt/libusb/lib/libusb-1.0.0.dylib .
+          cp /opt/homebrew/opt/hidapi/lib/libhidapi.0.dylib .
+          
+          # Check architecture of dylib files
+          echo "Architecture info:"
+          file libusb-1.0.0.dylib
+          file libhidapi.0.dylib
+          file openocd
+          
           # Fix openocd binary to use local dylibs
           echo "Fixing openocd dependencies..."
           install_name_tool -change /opt/homebrew/opt/libusb/lib/libusb-1.0.0.dylib "@executable_path/./libusb-1.0.0.dylib" ./openocd
