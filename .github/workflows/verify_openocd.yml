@@ -1,0 +1,13 @@
+name: Verify openocd
+
+on: [push, pull_request]
+
+jobs:
+  verify-openocd:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: List dependencies
+        run: otool -L ./bin/openocd
+      - name: Try to run openocd
+        run: ./bin/openocd --version || true
