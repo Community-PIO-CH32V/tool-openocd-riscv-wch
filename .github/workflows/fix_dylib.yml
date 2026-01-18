@@ -18,11 +18,11 @@ jobs:
         run: ./bin/openocd --version || true
       - name: Fix dylib dependencies
         run: |
-          cd bin
-          # Fix openocd binary to search for dylibs in ../lib directory
+          cd bin        
+          # Fix openocd binary to use local dylibs
           echo "Fixing openocd dependencies..."
-          install_name_tool -change /opt/homebrew/opt/libusb/lib/libusb-1.0.0.dylib "@loader_path/../lib/libusb-1.0.0.dylib" ./openocd
-          install_name_tool -change /opt/homebrew/opt/hidapi/lib/libhidapi.0.dylib "@loader_path/../lib/libhidapi.0.dylib" ./openocd
+          install_name_tool -change /opt/homebrew/opt/libusb/lib/libusb-1.0.0.dylib "@executable_path/./libusb-1.0.0.dylib" ./openocd
+          install_name_tool -change /opt/homebrew/opt/hidapi/lib/libhidapi.0.dylib "@executable_path/./libhidapi.0.dylib" ./openocd
           
           # Verify the changes
           otool -L ./openocd
@@ -34,5 +34,5 @@ jobs:
           name: openocd-fixed
           path: |
             bin/openocd
-            lib/libusb-1.0.0.dylib
-            lib/libhidapi.0.dylib
+            bin/libusb-1.0.0.dylib
+            bin/libhidapi.0.dylib
