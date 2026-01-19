@@ -17,6 +17,11 @@ jobs:
           brew install libusb hidapi
           brew info libusb
           brew info hidapi
+          echo "Listing libusb installation:"
+          ls -R  /usr/local/Cellar/libusb/1.0.29 || true
+          echo "Listing hidapi installation:"
+          ls -R  /usr/local/Cellar/hidapi/0.15.0 || true
+
       - name: List dependencies (macOS)
         run: otool -L ./bin/openocd
       - name: Try to run unfixed openocd
