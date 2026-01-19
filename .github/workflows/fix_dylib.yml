@@ -30,8 +30,8 @@ jobs:
         run: |
           cd bin
           # Copy dylib files from homebrew
-          cp /opt/homebrew/opt/libusb/lib/libusb-1.0.0.dylib .
-          cp /opt/homebrew/opt/hidapi/lib/libhidapi.0.dylib .
+          cp /usr/local/Cellar/libusb/1.0.29/lib/libusb-1.0.0.dylib .
+          cp /usr/local/Cellar/hidapi/0.15.0/lib/libhidapi.0.dylib .
           
           # Check architecture of dylib files
           echo "Architecture info:"
@@ -41,8 +41,8 @@ jobs:
           
           # Fix openocd binary to use local dylibs
           echo "Fixing openocd dependencies..."
-          install_name_tool -change /opt/homebrew/opt/libusb/lib/libusb-1.0.0.dylib "@executable_path/./libusb-1.0.0.dylib" ./openocd
-          install_name_tool -change /opt/homebrew/opt/hidapi/lib/libhidapi.0.dylib "@executable_path/./libhidapi.0.dylib" ./openocd
+          install_name_tool -change /usr/local/opt/libusb/lib/libusb-1.0.0.dylib "@executable_path/./libusb-1.0.0.dylib" ./openocd
+          install_name_tool -change /usr/local/opt/hidapi/lib/libhidapi.0.dylib "@executable_path/./libhidapi.0.dylib" ./openocd
           
           # Verify the changes
           otool -L ./openocd
