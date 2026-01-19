@@ -1,0 +1,54 @@
+name: Fix dylib dependencies
+
+on: [push, pull_request]
+
+jobs:
+  check-dylib:
+    strategy:
+      fail-fast: false
+      matrix:
+        # See https://github.com/actions/runner-images?tab=readme-ov-file#available-images
+        os: [macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies with brew
+        run: |
+          brew install libusb hidapi
+      - name: List dependencies (macOS)
+        run: otool -L ./bin/openocd
+      - name: Try to run unfixed openocd
+        run: ./bin/openocd --version || true
+      - name: Fix dylib dependencies
+        run: |
+          cd bin
+          # Copy dylib files from homebrew
+          cp /opt/homebrew/opt/libusb/lib/libusb-1.0.0.dylib .
+          cp /opt/homebrew/opt/hidapi/lib/libhidapi.0.dylib .
+          
+          # Check architecture of dylib files
+          echo "Architecture info:"
+          file libusb-1.0.0.dylib
+          file libhidapi.0.dylib
+          file openocd
+          
+          # Fix openocd binary to use local dylibs
+          echo "Fixing openocd dependencies..."
+          install_name_tool -change /opt/homebrew/opt/libusb/lib/libusb-1.0.0.dylib "@executable_path/./libusb-1.0.0.dylib" ./openocd
+          install_name_tool -change /opt/homebrew/opt/hidapi/lib/libhidapi.0.dylib "@executable_path/./libhidapi.0.dylib" ./openocd
+          
+          # Verify the changes
+          otool -L ./openocd
+      - name: Uninstall brew packages to verify self-contained binary
+        run: |
+          brew uninstall --ignore-dependencies libusb hidapi
+      - name: Try to run fixed openocd
+        run: ./bin/openocd --version || true
+      - name: Upload fixed openocd
+        uses: actions/upload-artifact@v4
+        with:
+          name: openocd-fixed
+          path: |
+            bin/openocd
+            bin/libusb-1.0.0.dylib
+            bin/libhidapi.0.dylib
